@@ -1,0 +1,40 @@
+# Para onde cada print pode ir. O router só decide QUANDO algo vai para um destino;
+# o COMO inserir fica no CLAUDE.md do repo de destino (seção "Inserção via ctx-dispatch-router").
+#
+# nome:     identificador curto (aparece na notificação e no log)
+# tipo:     repo   = repo git; cada inserção vira um commit "dispatch:" (reversível com git revert)
+#           folder = pasta comum; sem git, o log registra os arquivos alterados (sem desfazer automático)
+# path:     caminho absoluto da pasta/repo (precisa ter CLAUDE.md com a seção de inserção)
+# criterio: o que vai e o que NÃO vai. Seja concreto: o roteador só tem isso para decidir.
+
+destinos:
+  - nome: applications
+    tipo: repo
+    path: ~/Test/applications
+    criterio: |
+      Vai: vagas de emprego/estágio que eu esteja considerando (descrição da vaga, requisitos,
+      empresa, salário), status das minhas candidaturas (e-mail de confirmação, convite para
+      entrevista, recusa, proposta), anotações de entrevistas e contatos de recrutadores.
+      NÃO vai: posts genéricos de LinkedIn sobre carreira, cursos e certificações (mesmo que
+      ajudem a conseguir vaga), notícias sobre empresas sem relação com uma candidatura minha.
+
+  - nome: faculdade
+    tipo: repo
+    path: ~/Test/faculdade
+    criterio: |
+      Vai: conteúdo das disciplinas do curso de Ciência da Computação: slides, enunciados de
+      listas e trabalhos, trechos de livro-texto, fórmulas, definições, código de aula, datas
+      de provas e entregas, avisos do SIGAA ou dos professores.
+      NÃO vai: tutoriais ou artigos técnicos aleatórios da internet sem ligação com uma
+      disciplina, coisas de trabalho ou de projetos pessoais, burocracia de estágio (vai em
+      applications se for candidatura).
+
+  - nome: futuro
+    tipo: repo
+    path: ~/Test/futuro
+    criterio: |
+      Vai: planos e metas de médio/longo prazo: ideias de projetos pessoais, mestrado ou
+      intercâmbio, finanças pessoais e metas de economia, livros/cursos que quero fazer um dia,
+      reflexões sobre carreira e mudanças de vida.
+      NÃO vai: vagas concretas ou candidaturas em andamento (applications), conteúdo de
+      disciplina em curso (faculdade), tarefas do dia a dia com prazo nesta semana.
