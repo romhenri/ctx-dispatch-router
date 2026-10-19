@@ -43,9 +43,14 @@ dentro daquele destino faz a inserção (e commita, se for repo). Tudo está em 
 ou `dry-run`, e com `arquivos` alterados e `commit`. Para ver: `router.py status`.
 `run.log`: stdout/stderr das execuções em segundo plano. É o primeiro lugar para olhar quando uma captura some.
 
+## Registro de destinos
+
+`destinations.yaml` é o exemplo versionado. `destinations.dev.yaml` e `destinations.local.yaml` (gitignored)
+substituem ele por inteiro, sem merge. Prioridade: `.dev`, depois `.local`, depois o versionado. A variável `DESTINATIONS` vence os dois.
+
 ## Testar
 
-Nunca rode a fase 2 nos repos reais para testar. Use `DESTINOS=<yaml de teste>` apontando para repos
+Nunca rode a fase 2 nos repos reais para testar. Use `DESTINATIONS=<yaml de teste>` apontando para repos
 descartáveis. `--dry-run` roda só a fase 1 e não move nada. `CLAUDE_BIN` escolhe o binário do claude
 (o `.app` roda com PATH mínimo, por isso o `install.sh` grava o caminho absoluto).
 

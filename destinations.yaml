@@ -1,3 +1,6 @@
+# Exemplo versionado. Para os seus destinos reais, copie para destinations.dev.yaml ou
+# destinations.local.yaml (gitignored). Prioridade: .dev, .local, este arquivo. Sem merge.
+#
 # Para onde cada print pode ir. O router só decide QUANDO algo vai para um destino;
 # o COMO inserir fica no CLAUDE.md do repo de destino (seção "Inserção via ctx-dispatch-router").
 #
@@ -7,7 +10,7 @@
 # path:     caminho absoluto da pasta/repo (precisa ter CLAUDE.md com a seção de inserção)
 # criterio: o que vai e o que NÃO vai. Seja concreto: o roteador só tem isso para decidir.
 
-destinos:
+destinations:
   - nome: applications
     tipo: repo
     path: ~/Test/applications

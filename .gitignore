@@ -3,3 +3,5 @@ log.jsonl
 run.log
 dispatch-hotkey
 __pycache__/
+destinations.dev.yaml
+destinations.local.yaml

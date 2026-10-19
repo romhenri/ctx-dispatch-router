@@ -24,7 +24,11 @@ DONE = INBOX / "done"
 PEND = INBOX / "pending"
 LOG = ROOT / "log.jsonl"
 CLAUDE = os.environ.get("CLAUDE_BIN", "claude")
-DESTINOS = Path(os.environ.get("DESTINOS", ROOT / "destinos.yaml"))  # outro arquivo para testes
+# O primeiro que existir vence, sem merge: .dev e .local são gitignored (paths/critérios pessoais).
+# DESTINATIONS força outro arquivo.
+DESTINATIONS = Path(os.environ.get("DESTINATIONS") or next(
+    (p for p in (ROOT / f"destinations{s}.yaml" for s in (".dev", ".local")) if p.exists()),
+    ROOT / "destinations.yaml"))
 
 # Fase 2: só editar arquivos (e commitar, se repo). dontAsk nega tudo que não estiver na lista.
 FILE_TOOLS = ["Read", "Edit", "Write", "Glob", "Grep"]
@@ -63,15 +67,17 @@ Ao terminar, faça `git add` só dos arquivos que você alterou e `git commit -m
 
 
 def load_destinos():
-    data = yaml.safe_load(DESTINOS.read_text()) or {}
-    destinos = data.get("destinos") or []
+    data = yaml.safe_load(DESTINATIONS.read_text()) or {}
+    destinos = data.get("destinations") or []
+    if not destinos:
+        sys.exit(f"{DESTINATIONS}: nenhum destino em 'destinations:'")
     for d in destinos:
         missing = {"nome", "path", "criterio"} - d.keys()
         if missing:
-            sys.exit(f"destinos.yaml: destino {d.get('nome', '?')} sem {', '.join(sorted(missing))}")
+            sys.exit(f"{DESTINATIONS.name}: destino {d.get('nome', '?')} sem {', '.join(sorted(missing))}")
         d.setdefault("tipo", "repo")
         if d["tipo"] not in TIPOS:
-            sys.exit(f"destinos.yaml: destino {d['nome']} com tipo {d['tipo']!r} (use {' ou '.join(TIPOS)})")
+            sys.exit(f"{DESTINATIONS.name}: destino {d['nome']} com tipo {d['tipo']!r} (use {' ou '.join(TIPOS)})")
     return {d["nome"]: d for d in destinos}
 
 
