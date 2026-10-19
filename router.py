@@ -48,6 +48,9 @@ Destinos:
 Regras:
 - Exatamente um destino, ou "nenhum" se nada se encaixa claramente. "nenhum" é uma resposta normal.
 - confianca "alta" só quando o conteúdo bate sem ambiguidade com o critério do destino.
+- confianca mede a certeza sobre o DESTINO, não o quanto o print está completo. Prints curtos são
+  normais (às vezes só um termo ou o começo de uma frase): se o critério de um destino cobre esse caso,
+  a confiança pode ser alta.
 - justificativa: uma frase.
 - conteudo: transcrição fiel do que está na imagem (texto completo; resuma só o que não for texto)."""
 
