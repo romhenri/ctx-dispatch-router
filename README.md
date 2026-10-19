@@ -1,59 +1,62 @@
 # ctx-dispatch-router
 
-Aperte **⌘⇧D**, selecione uma região da tela e o print vai sozinho para o repo certo
-(candidaturas, faculdade, planos...). O Claude Code decide o destino e insere o conteúdo seguindo o
-CLAUDE.md daquele destino. Destinos `repo` ganham um commit `dispatch:` (reversível); destinos
-`folder` são pastas comuns, sem git.
+Press **⌘⇧D**, select a region of the screen, and the screenshot goes to the right repo on its own
+(applications, college notes, plans...). Claude Code picks the destination and inserts the content
+following that destination's CLAUDE.md. `repo` destinations get a `dispatch:` commit (revertible);
+`folder` destinations are plain folders without git.
 
-## Instalação (macOS)
+## Installation (macOS)
 
-Requisitos: Python 3, Claude Code (`claude`) logado e Xcode Command Line Tools (`swiftc`).
+Requirements: Python 3, Claude Code (`claude`) logged in, and Xcode Command Line Tools (`swiftc`).
 
 ```bash
 ./install.sh
 ```
 
-O script instala o PyYAML, cria `/Applications/CtxDispatch.app` e registra o atalho como LaunchAgent,
-que sobe sozinho no login. Na primeira captura, o macOS pede **Gravação de Tela** para o CtxDispatch.
-Libere a permissão e capture de novo.
+The script installs PyYAML, creates `/Applications/CtxDispatch.app`, and registers the hotkey as a
+LaunchAgent that starts at login. On the first capture, macOS asks for **Screen Recording** permission
+for CtxDispatch. Grant it and capture again.
 
-Depois:
+Then:
 
-1. Edite `destinos.yaml` com os seus destinos (`nome`, `tipo: repo|folder`, `path`, `criterio` com "Vai" e "NÃO vai").
-2. Em cada repo de destino, cole `templates/insercao-claude-md.md` no CLAUDE.md e preencha os
-   trechos `EDITE` (arquivo e formato). Um destino sem CLAUDE.md fica sempre como pendente.
+1. Copy `destinations.yaml` to `destinations.dev.yaml` (or `destinations.local.yaml`) and edit it with
+   your destinations (`nome`, `tipo: repo|folder`, `path`, `criterio` with "Vai" and "NÃO vai"). The first
+   file that exists wins, with no merging: `.dev.yaml`, then `.local.yaml`, then the versioned
+   `destinations.yaml`. Both overrides are in `.gitignore`, so personal paths and criteria stay on your machine.
+2. In each destination, paste `templates/insercao-claude-md.md` into its CLAUDE.md and fill in the
+   `EDITE` parts (file and format). A destination without CLAUDE.md always ends up pending.
 
-## Uso
+## Usage
 
-| Comando | O que faz |
+| Command | What it does |
 |---|---|
-| ⌘⇧D | captura a região (Esc cancela), processa em segundo plano e mostra uma notificação |
-| `./router.py run img.png --dry-run` | só a fase 1: mostra a decisão sem mover nem inserir nada |
-| `./router.py run img.png` | pipeline completo para uma imagem já existente |
-| `./router.py review` | revisa os pendentes: aprovar, trocar destino, descartar, abrir a imagem |
-| `./router.py status [-n 10]` | resultado das últimas execuções, com os arquivos alterados e o commit |
+| ⌘⇧D | captures the region (Esc cancels), processes it in the background and shows a notification |
+| `./router.py run img.png --dry-run` | phase 1 only: shows the decision without moving or inserting anything |
+| `./router.py run img.png` | full pipeline for an existing image |
+| `./router.py review` | reviews pending captures: approve, change destination, discard, open the image |
+| `./router.py status [-n 10]` | outcome of the latest runs, with changed files and commit |
 
-Resultados (na notificação e no `status`):
+Outcomes (in the notification and in `status`; the labels themselves are in Portuguese):
 
-| | Significado |
+| | Meaning |
 |---|---|
-| ✅ inserido | algo foi gravado no destino (arquivos listados, mais o commit se for repo) |
-| ➖ sem alteração | o destino foi certo, mas nada mudou (ex.: já existia) |
-| ⏸ pendente | não inserido por decisão: `nenhum`, confiança média/baixa, path ou CLAUDE.md ausente |
-| ❌ erro | não inserido por falha (claude falhou, alterou sem commitar...) |
+| ✅ `inserido` | something was written to the destination (files listed, plus the commit for repos) |
+| ➖ `sem alteração` | right destination, but nothing changed (e.g. it already existed) |
+| ⏸ `pendente` | not inserted by decision: `nenhum`, medium/low confidence, missing path or CLAUDE.md |
+| ❌ `erro` | not inserted because of a failure (claude failed, changed files without committing...) |
 
-As notificações não aparecem com Foco/Não Perturbe ativo. O `status` sempre mostra o resultado.
+Notifications don't show while Focus/Do Not Disturb is on. `status` always shows the outcome.
 
-Para onde vai cada captura:
-- **`inbox/done/`**: inserida com sucesso.
-- **`inbox/pending/`**: algo impediu a inserção. O `.json` ao lado traz a decisão e o motivo.
-- **`log.jsonl`**: histórico com o hash do commit.
-- **`run.log`**: erros das execuções em segundo plano.
+Where each capture ends up:
+- **`inbox/done/`**: inserted successfully.
+- **`inbox/pending/`**: something blocked the insertion. The `.json` next to it holds the decision and the reason.
+- **`log.jsonl`**: history with the commit hash.
+- **`run.log`**: errors from background runs.
 
-Desfazer uma inserção: `git revert <hash>` no destino `repo`. Em `folder`, os arquivos alterados
-aparecem no `status` e precisam ser revertidos à mão.
+Undo an insertion: `git revert <hash>` in the `repo` destination. For a `folder`, the changed files
+show up in `status` and must be reverted by hand.
 
-## Desinstalar
+## Uninstall
 
 ```bash
 launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.ctx-dispatch-router.hotkey.plist
