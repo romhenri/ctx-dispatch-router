@@ -2,6 +2,7 @@
 # Instala o CtxDispatch.app (captura + pipeline) e o atalho global ⌘⇧D (LaunchAgent, sobe sozinho no login)
 set -e
 cd "$(dirname "$0")" && DIR=$(pwd)
+[ "$(uname)" = Linux ] && exec ./install-linux.sh
 PY=$(python3 -c 'import sys; print(sys.executable)')
 CLAUDE_BIN=${CLAUDE_BIN:-$(type -ap claude | grep -v cmux-cli-shims | head -1)}  # pula o shim temporário do cmux
 "$PY" -m pip install -q pyyaml

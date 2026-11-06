@@ -1,6 +1,6 @@
 # ctx-dispatch-router
 
-Press **⌘⇧D**, select a region of the screen, and the screenshot goes to the right repo on its own
+Press **⌘⇧D** (**Super+Shift+D** on Linux), select a region of the screen, and the screenshot goes to the right repo on its own
 (applications, college notes, plans...). Claude Code picks the destination and inserts the content
 following that destination's CLAUDE.md. `repo` destinations get a `dispatch:` commit (revertible);
 `folder` destinations are plain folders without git.
@@ -25,6 +25,21 @@ Then:
    `destinations.yaml`. Both overrides are in `.gitignore`, so personal paths and criteria stay on your machine.
 2. In each destination, paste `templates/insercao-claude-md.md` into its CLAUDE.md and fill in the
    `EDITE` parts (file and format). A destination without CLAUDE.md always ends up pending.
+
+## Installation (Linux, GNOME)
+
+Requirements: GNOME (Wayland or X11), Python 3 with `python3-yaml` and `python3-gi`, `notify-send`, and
+Claude Code (`claude`) logged in. Ubuntu ships all of them except Claude Code and possibly `python3-yaml`.
+
+```bash
+./install.sh
+```
+
+The script registers **Super+Shift+D** as a GNOME custom shortcut (it shows up in Settings → Keyboard).
+Captures go through `xdg-desktop-portal`, so no screenshot tool is needed. Other desktops need their own
+shortcut pointing at `router.py capture`, with `CLAUDE_BIN` set to the absolute path of `claude`.
+Then follow steps 1 and 2 above. The hotkey runs `router.py` from this checkout, so keep this branch
+checked out here.
 
 ## Usage
 
@@ -57,6 +72,8 @@ Undo an insertion: `git revert <hash>` in the `repo` destination. For a `folder`
 show up in `status` and must be reverted by hand.
 
 ## Uninstall
+
+On Linux, remove the `ctx-dispatch-router` entry in Settings → Keyboard → Custom Shortcuts. On macOS:
 
 ```bash
 launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.ctx-dispatch-router.hotkey.plist
