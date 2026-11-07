@@ -18,6 +18,7 @@ from pathlib import Path
 
 import yaml
 
+MAC = sys.platform == "darwin"
 ROOT = Path(__file__).resolve().parent
 INBOX = ROOT / "inbox"
 DONE = INBOX / "done"
@@ -167,9 +168,12 @@ def insert(img, dest, conteudo):
 
 
 def notify(msg):
-    subprocess.run(["osascript", "-e", "on run argv", "-e",
-                    'display notification (item 1 of argv) with title "ctx-dispatch-router"',
-                    "-e", "end run", msg], capture_output=True)
+    if MAC:
+        subprocess.run(["osascript", "-e", "on run argv", "-e",
+                        'display notification (item 1 of argv) with title "ctx-dispatch-router"',
+                        "-e", "end run", msg], capture_output=True)
+    else:
+        subprocess.run(["notify-send", "--", "ctx-dispatch-router", msg], capture_output=True)
 
 
 def log(img, decisao, resultado, motivo=None, commit=None, arquivos=None):
@@ -246,10 +250,42 @@ def run(img, dry_run=False):
     dispatch(img, decisao, destinos)
 
 
+def portal_screenshot():
+    """Seleção interativa pelo xdg-desktop-portal (Wayland). Devolve o Path do print, ou None se cancelou."""
+    import gi
+    gi.require_version("Gio", "2.0")
+    from gi.repository import Gio, GLib
+
+    bus = Gio.bus_get_sync(Gio.BusType.SESSION)
+    token = f"ctxdispatch{os.getpid()}"
+    sender = bus.get_unique_name().lstrip(":").replace(".", "_")
+    request = f"/org/freedesktop/portal/desktop/request/{sender}/{token}"
+    loop, uri = GLib.MainLoop(), []
+
+    def on_response(_conn, _sender, _path, _iface, _signal, params):
+        code, results = params.unpack()
+        if code == 0:  # 1 = cancelado
+            uri.append(results["uri"])
+        loop.quit()
+
+    # Assina antes de chamar: a resposta pode chegar antes do retorno de Screenshot.
+    bus.signal_subscribe("org.freedesktop.portal.Desktop", "org.freedesktop.portal.Request", "Response",
+                         request, None, Gio.DBusSignalFlags.NONE, on_response)
+    options = {"handle_token": GLib.Variant("s", token), "interactive": GLib.Variant("b", True)}
+    bus.call_sync("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop",
+                  "org.freedesktop.portal.Screenshot", "Screenshot", GLib.Variant("(sa{sv})", ("", options)),
+                  None, Gio.DBusCallFlags.NONE, -1, None)
+    loop.run()
+    return Path(Gio.File.new_for_uri(uri[0]).get_path()) if uri else None
+
+
 def capture():
     INBOX.mkdir(exist_ok=True)
     img = INBOX / f"{datetime.now():%Y-%m-%dT%H-%M-%S}.png"
-    subprocess.run(["screencapture", "-i", "-x", str(img)])
+    if MAC:
+        subprocess.run(["screencapture", "-i", "-x", str(img)])
+    elif shot := portal_screenshot():
+        shutil.move(shot, img)
     if not img.exists():  # Esc
         return
     # Processa desacoplado: o atalho volta na hora. Saída em run.log para depuração.
@@ -273,7 +309,7 @@ def review():
         while True:
             op = input("   [a]provar  [t]rocar destino  [d]escartar  [p]ular  [o]abrir  [s]air > ").strip().lower()
             if op == "o":
-                subprocess.run(["open", str(img)])
+                subprocess.run(["open" if MAC else "xdg-open", str(img)])
                 continue
             if op == "s":
                 return

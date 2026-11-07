@@ -13,6 +13,9 @@ dentro daquele destino faz a inserção (e commita, se for repo). Tudo está em 
     → done/ ou pending/ (+ .json), log.jsonl, notificação (osascript)
 ```
 
+No Linux (GNOME) só muda a ponta: Super+Shift+D → atalho do GNOME (`install-linux.sh`) → `router.py capture`
+→ `portal_screenshot()` (xdg-desktop-portal, funciona em Wayland), e a notificação usa `notify-send`.
+
 ## Invariantes (não quebre)
 
 - **O router decide só QUANDO, nunca COMO.** Arquivo, formato e duplicatas são decididos pela seção
@@ -52,8 +55,8 @@ substituem ele por inteiro, sem merge. Prioridade: `.dev`, depois `.local`, depo
 
 Nunca rode a fase 2 nos repos reais para testar. Use `DESTINATIONS=<yaml de teste>` apontando para repos
 descartáveis. `--dry-run` roda só a fase 1 e não move nada. `CLAUDE_BIN` escolhe o binário do claude
-(o `.app` roda com PATH mínimo, por isso o `install.sh` grava o caminho absoluto).
+(o `.app` e o atalho do GNOME rodam com PATH mínimo, por isso os instaladores gravam o caminho absoluto).
 
 ## Mexendo no atalho
 
-A tecla fica em `hotkey.swift` (`kVK_ANSI_D`, `cmdKey | shiftKey`). Depois de alterar, rode `./install.sh`.
+A tecla fica em `hotkey.swift` (`kVK_ANSI_D`, `cmdKey | shiftKey`). No Linux, em `install-linux.sh` (`binding`). Depois de alterar, rode `./install.sh`.
